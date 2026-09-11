@@ -1,0 +1,1010 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="XChat — Connect Beyond Boundaries with cross-platform real-time messaging." />
+    <title>XChat — Connect Beyond Boundaries</title>
+
+    <!-- Typography & Icons -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+
+    <!-- Firebase SDKs (v10 Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.0.0/firebase-messaging-compat.js"></script>
+
+    <style>
+        /* ==========================================================================
+           1. CORE VARIABLES & THEMING
+           ========================================================================== */
+        :root {
+            --burnt-orange: #CC5500;
+            --burnt-orange-light: #E97451;
+            --royal-blue: #2B3B6B;
+            --royal-blue-light: #4169E1;
+            --priestly-purple: #7B2FBE;
+            --priestly-purple-light: #9B4FD9;
+            --priestly-purple-dark: #4A1282;
+
+            --bg-primary: #0D0F1A;
+            --bg-secondary: #141829;
+            --bg-card: #1A1F35;
+            --bg-card-hover: #232A47;
+            --bg-input: #0F1325;
+            --border-color: #2A2F4A;
+
+            --text-primary: #F0EFF5;
+            --text-secondary: #B8B5CC;
+            --text-muted: #7A7894;
+
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+            --radius-lg: 16px;
+            --radius-md: 10px;
+            --radius-sm: 6px;
+            --transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+            --gradient-main: linear-gradient(135deg, #1A2745, #5A1F8A);
+            --gradient-accent: linear-gradient(135deg, #CC5500, #E97451);
+            --font-main: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        body.light-theme {
+            --bg-primary: #F4F3F8;
+            --bg-secondary: #EBE8F3;
+            --bg-card: #FFFFFF;
+            --bg-card-hover: #F6F4FB;
+            --bg-input: #EFF0F6;
+            --border-color: #D6D2E1;
+
+            --text-primary: #181725;
+            --text-secondary: #3E3B54;
+            --text-muted: #716E89;
+
+            --shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        /* ==========================================================================
+           2. BASE RESETS
+           ========================================================================== */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: var(--font-main);
+            background-color: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.5;
+            transition: background-color 0.3s ease, color 0.3s ease;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button, input, textarea, select {
+            font-family: inherit;
+            outline: none;
+            border: none;
+            background: transparent;
+            color: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--priestly-purple);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--priestly-purple-light);
+        }
+
+        /* ==========================================================================
+           3. NAVBAR
+           ========================================================================== */
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 28px;
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(12px);
+            gap: 16px;
+        }
+
+        .navbar-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .navbar-brand i {
+            font-size: 1.8rem;
+            background: var(--gradient-accent);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .navbar-brand .x {
+            color: var(--burnt-orange);
+        }
+
+        .navbar-search {
+            display: flex;
+            align-items: center;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            padding: 6px 16px;
+            gap: 10px;
+            flex: 1;
+            max-width: 480px;
+            transition: var(--transition);
+        }
+
+        .navbar-search:focus-within {
+            border-color: var(--priestly-purple-light);
+            box-shadow: 0 0 0 3px rgba(123, 47, 190, 0.2);
+        }
+
+        .navbar-search input {
+            flex: 1;
+            font-size: 0.88rem;
+        }
+
+        .navbar-search select {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            padding-right: 4px;
+        }
+
+        .navbar-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .nav-btn {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            color: var(--text-secondary);
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .nav-btn:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .nav-btn .badge {
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            background: var(--burnt-orange);
+            color: #fff;
+            font-size: 0.6rem;
+            font-weight: 700;
+            width: 17px;
+            height: 17px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid var(--bg-secondary);
+        }
+
+        .avatar {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            background: var(--gradient-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 2px solid var(--priestly-purple-light);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .avatar:hover {
+            transform: scale(1.05);
+            border-color: var(--burnt-orange);
+        }
+
+        /* ==========================================================================
+           4. APP LAYOUT
+           ========================================================================== */
+        .app-layout {
+            display: flex;
+            height: calc(100vh - 65px);
+            overflow: hidden;
+        }
+
+        /* Left Sidebar */
+        .sidebar-left {
+            width: 240px;
+            background: var(--bg-secondary);
+            border-right: 1px solid var(--border-color);
+            padding: 20px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-left .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            transition: var(--transition);
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .sidebar-left .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .sidebar-left .nav-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .sidebar-left .nav-item.active {
+            background: var(--bg-card);
+            color: #fff;
+            border-left: 3px solid var(--burnt-orange);
+        }
+
+        .sidebar-left .nav-item .badge-count {
+            margin-left: auto;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 50px;
+            background: var(--priestly-purple-dark);
+            color: var(--text-primary);
+        }
+
+        .sidebar-divider {
+            border: none;
+            border-top: 1px solid var(--border-color);
+            margin: 10px 0;
+        }
+
+        .section-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            padding: 8px 14px 4px;
+            font-weight: 700;
+        }
+
+        /* Main Content Feed */
+        .main-content {
+            flex: 1;
+            padding: 24px 32px;
+            overflow-y: auto;
+            background: var(--bg-primary);
+        }
+
+        .platform-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .platform-header h2 {
+            font-size: 1.4rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .platform-header h2 i {
+            color: var(--burnt-orange);
+        }
+
+        .platform-tabs {
+            display: flex;
+            gap: 4px;
+            background: var(--bg-secondary);
+            padding: 4px;
+            border-radius: 50px;
+            border: 1px solid var(--border-color);
+        }
+
+        .platform-tabs button {
+            padding: 6px 16px;
+            border-radius: 50px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .platform-tabs button.active {
+            background: var(--priestly-purple);
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(123, 47, 190, 0.3);
+        }
+
+        .feed {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-width: 760px;
+            margin: 0 auto;
+        }
+
+        /* Composer */
+        .post-composer {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+        }
+
+        .composer-top {
+            display: flex;
+            gap: 14px;
+        }
+
+        .composer-top textarea {
+            flex: 1;
+            background: var(--bg-input);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            font-size: 0.92rem;
+            resize: vertical;
+            min-height: 70px;
+            transition: var(--transition);
+        }
+
+        .composer-top textarea:focus {
+            border-color: var(--priestly-purple-light);
+        }
+
+        .attachment-preview {
+            display: none;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg-input);
+            padding: 8px 14px;
+            border-radius: var(--radius-md);
+            margin-top: 10px;
+            border: 1px dashed var(--priestly-purple-light);
+            font-size: 0.82rem;
+        }
+
+        .attachment-preview.active {
+            display: flex;
+        }
+
+        .composer-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 14px;
+        }
+
+        .action-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-btn-item {
+            padding: 8px 14px;
+            border-radius: 50px;
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--text-muted);
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .action-btn-item:hover {
+            background: var(--bg-card-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-post {
+            padding: 8px 24px;
+            border-radius: 50px;
+            background: var(--gradient-accent);
+            font-weight: 700;
+            font-size: 0.85rem;
+            color: #fff;
+            transition: var(--transition);
+            box-shadow: 0 4px 16px rgba(204, 85, 0, 0.3);
+        }
+
+        .btn-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(204, 85, 0, 0.4);
+        }
+
+        /* Post Cards */
+        .post-card {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            border: 1px solid var(--border-color);
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .post-card:hover {
+            border-color: var(--priestly-purple-light);
+        }
+
+        .post-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .post-user-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .post-user-info strong {
+            font-size: 0.95rem;
+        }
+
+        .post-user-info span {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .post-platform-tag {
+            margin-left: auto;
+            font-size: 0.7rem;
+            padding: 4px 10px;
+            border-radius: 50px;
+            background: var(--bg-input);
+            color: var(--burnt-orange-light);
+            border: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .post-body {
+            margin-top: 14px;
+            font-size: 0.92rem;
+            line-height: 1.6;
+        }
+
+        .post-footer {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            margin-top: 16px;
+            padding-top: 12px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .post-footer-btn {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            transition: var(--transition);
+        }
+
+        .post-footer-btn:hover, .post-footer-btn.active {
+            color: var(--burnt-orange);
+        }
+
+        /* Right Sidebar */
+        .sidebar-right {
+            width: 310px;
+            background: var(--bg-secondary);
+            border-left: 1px solid var(--border-color);
+            padding: 20px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .widget-box {
+            background: var(--bg-card);
+            border-radius: var(--radius-lg);
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .widget-title {
+            font-size: 0.88rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--text-secondary);
+        }
+
+        .ad-card {
+            background: var(--bg-input);
+            border-radius: var(--radius-md);
+            padding: 12px;
+            border-left: 3px solid var(--burnt-orange);
+            margin-bottom: 10px;
+            transition: var(--transition);
+        }
+
+        .ad-card:hover {
+            transform: translateX(3px);
+        }
+
+        .ad-card h5 {
+            font-size: 0.85rem;
+            margin-bottom: 4px;
+        }
+
+        .ad-card p {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+        }
+
+        /* Chat Widget */
+        .chat-widget {
+            display: flex;
+            flex-direction: column;
+            height: 340px;
+        }
+
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 4px;
+            margin-bottom: 12px;
+        }
+
+        .chat-msg {
+            display: flex;
+            gap: 8px;
+            max-width: 85%;
+        }
+
+        .chat-msg.me {
+            margin-left: auto;
+            flex-direction: row-reverse;
+        }
+
+        .msg-bubble {
+            background: var(--bg-input);
+            padding: 8px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            border: 1px solid var(--border-color);
+            position: relative;
+        }
+
+        .chat-msg.me .msg-bubble {
+            background: var(--priestly-purple-dark);
+            border-color: var(--priestly-purple-light);
+        }
+
+        .chat-input-bar {
+            display: flex;
+            align-items: center;
+            background: var(--bg-input);
+            border-radius: 50px;
+            padding: 4px 6px 4px 14px;
+            border: 1px solid var(--border-color);
+        }
+
+        .chat-input-bar input {
+            flex: 1;
+            font-size: 0.8rem;
+        }
+
+        .chat-send-btn {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--gradient-accent);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .sidebar-right { display: none; }
+        }
+        @media (max-width: 768px) {
+            .sidebar-left { width: 70px; padding: 12px 6px; }
+            .sidebar-left span, .sidebar-left .badge-count, .sidebar-left .section-label { display: none; }
+            .main-content { padding: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <!-- NAVBAR -->
+        <header class="navbar">
+            <div class="navbar-brand">
+                <i class="fa-solid fa-comments"></i>
+                <span><span class="x">X</span>Chat</span>
+            </div>
+
+            <div class="navbar-search">
+                <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted);"></i>
+                <input type="text" id="globalSearchInput" placeholder="Search posts, network feeds, ads..." />
+                <select id="searchTypeFilter">
+                    <option value="all">All</option>
+                    <option value="posts">Posts</option>
+                    <option value="ads">Ads</option>
+                </select>
+            </div>
+
+            <div class="navbar-actions">
+                <button class="nav-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+                    <i class="fa-solid fa-moon"></i>
+                </button>
+                <button class="nav-btn" title="Notifications">
+                    <i class="fa-regular fa-bell"></i>
+                    <span class="badge">3</span>
+                </button>
+                <button class="nav-btn" title="Settings">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
+                <div class="avatar" id="userAvatar">U</div>
+            </div>
+        </header>
+
+        <!-- APP MAIN LAYOUT -->
+        <div class="app-layout">
+            <!-- SIDEBAR LEFT -->
+            <aside class="sidebar-left">
+                <a href="#" class="nav-item active">
+                    <i class="fa-solid fa-house"></i>
+                    <span>Home Feed</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-solid fa-hashtag"></i>
+                    <span>Explore</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-solid fa-envelope"></i>
+                    <span>Messages</span>
+                    <span class="badge-count">12</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-solid fa-rectangle-ad"></i>
+                    <span>Ad Manager</span>
+                </a>
+
+                <hr class="sidebar-divider" />
+                <div class="section-label">Connected Streams</div>
+
+                <a href="#" class="nav-item">
+                    <i class="fa-brands fa-x-twitter"></i>
+                    <span>X Stream</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-brands fa-facebook"></i>
+                    <span>Facebook</span>
+                </a>
+                <a href="#" class="nav-item">
+                    <i class="fa-brands fa-linkedin"></i>
+                    <span>LinkedIn</span>
+                </a>
+            </aside>
+
+            <!-- MAIN CONTENT FEED -->
+            <main class="main-content">
+                <div class="platform-header">
+                    <h2><i class="fa-solid fa-globe"></i> Global Network Feed</h2>
+                    <div class="platform-tabs">
+                        <button class="active">All Streams</button>
+                        <button>Popular</button>
+                        <button>Recent</button>
+                    </div>
+                </div>
+
+                <div class="feed">
+                    <!-- COMPOSER -->
+                    <div class="post-composer">
+                        <div class="composer-top">
+                            <div class="avatar">U</div>
+                            <textarea id="composerInput" placeholder="What's happening across the multi-network stream?"></textarea>
+                        </div>
+
+                        <!-- Dynamic File Attachment Preview -->
+                        <div class="attachment-preview" id="attachmentPreview">
+                            <span><i class="fa-solid fa-paperclip"></i> <span id="attachedFileName">file.png</span></span>
+                            <button id="removeAttachmentBtn"><i class="fa-solid fa-xmark"></i></button>
+                        </div>
+
+                        <input type="file" id="hiddenFileInput" style="display: none;" />
+
+                        <div class="composer-actions">
+                            <div class="action-btns">
+                                <button class="action-btn-item" id="attachMediaBtn"><i class="fa-regular fa-image"></i> Media</button>
+                                <button class="action-btn-item" id="attachFileBtn"><i class="fa-solid fa-paperclip"></i> File</button>
+                                <button class="action-btn-item"><i class="fa-solid fa-microphone"></i> Voice</button>
+                            </div>
+                            <button class="btn-post" id="postBtn">Post</button>
+                        </div>
+                    </div>
+
+                    <!-- POSTS FEED -->
+                    <div id="postsFeedContainer">
+                        <article class="post-card">
+                            <div class="post-header">
+                                <div class="avatar">IN</div>
+                                <div class="post-user-info">
+                                    <strong>Ifesinachi Nduka</strong>
+                                    <span>@ifesinachilive • 2h ago</span>
+                                </div>
+                                <div class="post-platform-tag">
+                                    <i class="fa-solid fa-bolt"></i> XChat Native
+                                </div>
+                            </div>
+                            <div class="post-body">
+                                <p>Welcome to XChat! Connecting boundaries through seamless cross-platform communication, real-time sync, and end-to-end security.</p>
+                            </div>
+                            <div class="post-footer">
+                                <button class="post-footer-btn active"><i class="fa-solid fa-heart"></i> <span>42</span></button>
+                                <button class="post-footer-btn"><i class="fa-regular fa-comment"></i> <span>12</span></button>
+                                <button class="post-footer-btn"><i class="fa-solid fa-retweet"></i> <span>5</span></button>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </main>
+
+            <!-- RIGHT SIDEBAR -->
+            <aside class="sidebar-right">
+                <!-- ADVERTS SECTION -->
+                <div class="widget-box">
+                    <div class="widget-title">
+                        <span><i class="fa-solid fa-bullhorn" style="color: var(--burnt-orange);"></i> Sponsored</span>
+                        <small style="color: var(--text-muted); font-size: 0.7rem;">Ads</small>
+                    </div>
+                    <div class="ad-card">
+                        <h5>Cloud Native Suite</h5>
+                        <p>Deploy scalable real-time architectures with zero latency.</p>
+                    </div>
+                </div>
+
+                <!-- ENCRYPTED CHAT WIDGET -->
+                <div class="widget-box chat-widget">
+                    <div class="widget-title">
+                        <span><i class="fa-solid fa-lock" style="color: var(--priestly-purple-light);"></i> E2E Encrypted Chat</span>
+                    </div>
+
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="chat-msg">
+                            <div class="msg-bubble">
+                                Encrypted session initialized securely.
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="chat-input-bar">
+                        <input type="text" id="chatInputField" placeholder="Type encrypted message..." />
+                        <button class="chat-send-btn" id="chatSendBtn"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- ==========================================================================
+       5. JAVASCRIPT & FIREBASE CONFIGURATION
+       ========================================================================== -->
+    <script>
+        // --- YOUR ORIGINAL FIREBASE CONFIGURATION ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyCSnRVqFHmz4h-H6fNagp4TrT3CarZNmow",
+            authDomain: "xchat-958d4.firebaseapp.com",
+            projectId: "xchat-958d4",
+            storageBucket: "xchat-958d4.firebasestorage.app",
+            messagingSenderId: "25347816332",
+            appId: "1:25347816332:web:eb534109b2903dcf6e34a9",
+            measurementId: "G-HESZQFGJPL"
+        };
+
+        // --- YOUR VAPID KEY ---
+        const vapidKey = "BNnxVMoWm_5UCeGSRcMiBvECk-DlhnKBNNPYg7_lPvIuMpfD7Y5UaMVGqK44jd6CTRIp4qcagdEv58A5mhnqKOk";
+
+        // Initialize Firebase
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Setup FCM Messaging Function
+        async function setupFCM() {
+            try {
+                if (firebase.messaging.isSupported()) {
+                    const messaging = firebase.messaging();
+                    const token = await messaging.getToken({ vapidKey: vapidKey });
+                    if (token) {
+                        console.log('FCM Token received successfully:', token);
+                    }
+                }
+            } catch (err) {
+                console.warn('FCM setup notification skipped or unsupported in current environment:', err);
+            }
+        }
+        setupFCM();
+
+        // --- UI LOGIC & CONTROLLERS ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Theme Toggle Logic
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const storedTheme = localStorage.getItem('xchat_theme');
+            
+            if (storedTheme === 'light') {
+                document.body.classList.add('light-theme');
+                themeToggleBtn.querySelector('i').className = 'fa-solid fa-sun';
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('light-theme');
+                const isLight = document.body.classList.contains('light-theme');
+                themeToggleBtn.querySelector('i').className = isLight ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
+                localStorage.setItem('xchat_theme', isLight ? 'light' : 'dark');
+            });
+
+            // Attachment Handler
+            const attachFileBtn = document.getElementById('attachFileBtn');
+            const attachMediaBtn = document.getElementById('attachMediaBtn');
+            const hiddenFileInput = document.getElementById('hiddenFileInput');
+            const attachmentPreview = document.getElementById('attachmentPreview');
+            const attachedFileName = document.getElementById('attachedFileName');
+            const removeAttachmentBtn = document.getElementById('removeAttachmentBtn');
+
+            const triggerFile = () => hiddenFileInput.click();
+            attachFileBtn.addEventListener('click', triggerFile);
+            attachMediaBtn.addEventListener('click', triggerFile);
+
+            hiddenFileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    attachedFileName.textContent = e.target.files[0].name;
+                    attachmentPreview.classList.add('active');
+                }
+            });
+
+            removeAttachmentBtn.addEventListener('click', () => {
+                hiddenFileInput.value = '';
+                attachmentPreview.classList.remove('active');
+            });
+
+            // Dynamic Feed Posting
+            const postBtn = document.getElementById('postBtn');
+            const composerInput = document.getElementById('composerInput');
+            const postsFeedContainer = document.getElementById('postsFeedContainer');
+
+            postBtn.addEventListener('click', () => {
+                const text = composerInput.value.trim();
+                if (!text && !hiddenFileInput.files.length) return;
+
+                const card = document.createElement('article');
+                card.className = 'post-card';
+                card.innerHTML = `
+                    <div class="post-header">
+                        <div class="avatar">U</div>
+                        <div class="post-user-info">
+                            <strong>Current User</strong>
+                            <span>@you • Just now</span>
+                        </div>
+                        <div class="post-platform-tag">
+                            <i class="fa-solid fa-bolt"></i> XChat Native
+                        </div>
+                    </div>
+                    <div class="post-body">
+                        <p>${escapeHTML(text)}</p>
+                        ${hiddenFileInput.files.length ? `<small style="color: var(--priestly-purple-light);"><i class="fa-solid fa-paperclip"></i> Attached: ${escapeHTML(hiddenFileInput.files[0].name)}</small>` : ''}
+                    </div>
+                    <div class="post-footer">
+                        <button class="post-footer-btn"><i class="fa-solid fa-heart"></i> <span>0</span></button>
+                        <button class="post-footer-btn"><i class="fa-regular fa-comment"></i> <span>0</span></button>
+                        <button class="post-footer-btn"><i class="fa-solid fa-retweet"></i> <span>0</span></button>
+                    </div>
+                `;
+
+                postsFeedContainer.prepend(card);
+                composerInput.value = '';
+                hiddenFileInput.value = '';
+                attachmentPreview.classList.remove('active');
+            });
+
+            // Interactive Live Chat
+            const chatSendBtn = document.getElementById('chatSendBtn');
+            const chatInputField = document.getElementById('chatInputField');
+            const chatMessages = document.getElementById('chatMessages');
+
+            function sendChatMessage() {
+                const text = chatInputField.value.trim();
+                if (!text) return;
+
+                const msg = document.createElement('div');
+                msg.className = 'chat-msg me';
+                msg.innerHTML = `<div class="msg-bubble">${escapeHTML(text)}</div>`;
+                chatMessages.appendChild(msg);
+
+                chatInputField.value = '';
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            chatSendBtn.addEventListener('click', sendChatMessage);
+            chatInputField.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') sendChatMessage();
+            });
+
+            function escapeHTML(str) {
+                return str.replace(/[&<>'"]/g, tag => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;'
+                }[tag] || tag));
+            }
+        });
+    </script>
+</body>
+</html>
