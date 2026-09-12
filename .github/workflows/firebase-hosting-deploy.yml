@@ -1,0 +1,38 @@
+name: Firebase Hosting CI/CD
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      # 1. Check out your repository
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2. Verify static files exist
+      # Since you're deploying static HTML/CSS/JS, no build step needed
+      - name: Verify static files
+        run: |
+          echo "✓ Static files verified and ready for deployment"
+          ls -la index.html sw.js
+
+      # 3. Deploy to Firebase Hosting
+      - name: Deploy to Firebase Hosting
+        uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: "${{ secrets.GITHUB_TOKEN }}"
+          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
+          projectId: xchat-958d4
+          channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+          entryPoint: "."
