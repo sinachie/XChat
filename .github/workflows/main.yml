@@ -8,22 +8,16 @@ on:
       - main
 
 jobs:
-  build_and_deploy:
+  deploy:
     runs-on: ubuntu-latest
     steps:
+      # 1. Check out your static files
       - uses: actions/checkout@v4
 
-      # Install and Build your TypeScript/JavaScript Web App
-      - name: Install Dependencies
-        run: npm ci
-      - name: Build App
-        run: npm run build
-
-      # Deploy to Preview Channel on Pull Request, or Live on Merge
+      # 2. Deploy directly to Firebase Hosting
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
           repoToken: "${{ secrets.GITHUB_TOKEN }}"
           firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
           projectId: xchat-958d4
-          # If merged to main, deploy live. Otherwise, deploy to a temporary preview channel.
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}
