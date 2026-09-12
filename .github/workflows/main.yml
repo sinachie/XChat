@@ -22,6 +22,4 @@ jobs:
           projectId: xchat-958d4
           channelId: ${{ github.event_name == 'push' && 'live' || '' }}
           
-          firebaseServiceAccount: "${{ secrets.FIREBASE_SERVICE_ACCOUNT }}"
-          projectId: xchat-958d4
-          channelId: ${{ github.event_name == 'push' && 'live' || '' }}
+  
