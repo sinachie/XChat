@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-[#0A1118] text-white antialiased selection:bg-[#0047AB] selection:text-white;
+  }
+}
+
+/* Custom Scrollbar for Chat & Logs */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #05080C;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #0047AB;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #0066FF;
+}

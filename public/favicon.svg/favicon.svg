@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300">
+  <defs>
+    <linearGradient id="cobalt-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0047AB" />
+      <stop offset="50%" stop-color="#0066FF" />
+      <stop offset="100%" stop-color="#00D2FF" />
+    </linearGradient>
+  </defs>
+  <rect width="300" height="300" rx="60" fill="#0A1118" />
+  <g transform="translate(150, 150) scale(0.75)">
+    <path d="M -130 -120 L -80 -120 L 130 120 L 80 120 Z" fill="url(#cobalt-grad)" />
+    <path d="M 130 -120 L 80 -120 L -130 120 L -80 120 Z" fill="url(#cobalt-grad)" />
+    <circle cx="0" cy="0" r="48" fill="#0A1118" stroke="url(#cobalt-grad)" stroke-width="6" />
+    <path d="M -18 -12 H 18 A 10 10 0 0 1 28 -2 V 10 A 10 10 0 0 1 18 20 H 2 L -8 28 V 20 H -18 A 10 10 0 0 1 -28 10 V -2 A 10 10 0 0 1 -18 -12 Z" fill="url(#cobalt-grad)" />
+    <circle cx="-10" cy="4" r="3" fill="#FFFFFF" />
+    <circle cx="0" cy="4" r="3" fill="#FFFFFF" />
+    <circle cx="10" cy="4" r="3" fill="#FFFFFF" />
+  </g>
+</svg>

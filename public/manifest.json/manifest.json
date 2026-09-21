@@ -1,0 +1,18 @@
+{
+  "short_name": "XChat",
+  "name": "XChat - Connect Beyond Boundaries",
+  "description": "Encrypted Real-Time Messaging & Feed Engine",
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "type": "image/svg+xml",
+      "sizes": "any",
+      "purpose": "any maskable"
+    }
+  ],
+  "start_url": "/",
+  "background_color": "#0A1118",
+  "theme_color": "#0047AB",
+  "display": "standalone",
+  "orientation": "portrait"
+}
