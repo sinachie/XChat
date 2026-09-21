@@ -1,0 +1,20 @@
+# Step 1: Use official Node.js LTS image as base
+FROM node:20-alpine
+
+# Step 2: Set working directory inside the container
+WORKDIR /usr/src/app
+
+# Step 3: Copy package dependency manifests
+COPY package*.json ./
+
+# Step 4: Install production dependencies
+RUN npm ci --only=production
+
+# Step 5: Copy application source code
+COPY . .
+
+# Step 6: Expose the port Cloud Run / App Hosting expects (defaults to 8080)
+EXPOSE 8080
+
+# Step 7: Define the command to start the app
+CMD ["npm", "start"]
